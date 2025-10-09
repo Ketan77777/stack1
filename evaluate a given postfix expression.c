@@ -1,88 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include<ctype.h>
-#define SIZE 20
+#include<math.h>
+#define SIZE 10
 struct stack
 {
 int top;
-int data[SIZE];
+float data[10];
 };
 typedef struct stack STACK ;
-void push(STACK *s,char item)
+void push(STACK *s,float item)
 {
     s->data[++(s->top)]=item;
 }
-char pop(STACK *s)
+float pop(STACK *s)
 {
  return s->data[(s->top)--];
 }
-int preced(char symbol)
+float compute(float opr1,char symbol,float opr2)
 {
     switch (symbol)
     {
-    case '+':
-    case '-':return 1;
-    case '*':
-    case '/':return 3;
-    case '^':return 4;
+    case '+':return opr1+opr2;
+    case '-':return opr1-opr2;
+    case '*':return opr1*opr2;
+    case '/':return opr1/opr2;
+    case '^':return  pow(opr1,opr2);
     }
 }
-void infixtopostfix(STACK *s,char infix[20])
+float evaluatepostfix(STACK *s,char postfix[15])
 {
-    int i,j=0;
-    char symbol,postfix[20],temp;
-    for(i=0;infix[i]!='\0';i++)
+    int i;
+    float opr1,opr2,res;
+    char symbol;
+    for(i=0;postfix[i]!='\0';i++)
     {
-        symbol = infix[i];
-        if(isalnum(symbol))
+        symbol = postfix[i];
+        if(isdigit(symbol))
         {
-            postfix[j++]=symbol;
+            push(s,symbol-'0');
         }
         else
         {
-            switch(symbol)
-            {
-                case '(' :push(s,symbol);
-                          break;
-                case ')' :temp=pop(s);
-                          while(temp!='(')
-                          {
-                              postfix[j++]=temp;
-                              temp=pop(s);
-                          }
-                          break;
-                case '+':
-                case '-':
-                case '*':
-                case '/':
-                case '^':if((s->top==-1)||s->data[s->top]=='(')
-                            {
-                              push(s,symbol);
-                            }
-                         else
-                         {
-                             while(preced(s->data[s->top])>=preced(symbol) && s->top!=1 && s->data[s->top]!='(')
-                                    {
-                                        postfix[j++]=pop(s);
-                                    }
-                                    push(s,symbol);
-                         }
-                         break;
-                         }
+           opr2=pop(s);
+           opr1=pop(s);
+           res=compute(opr1,symbol,opr2);
+           push(s,res);
         }
     }
-while(s->top!=-1)
-    postfix[j++]=pop(s);
-postfix[j]='\0';
-printf("\n postfix expression is %s",postfix);
+    return pop(s);
 }
 int main()
 {
-    char infix[20];
+    char postfix[20];
     STACK s;
+    float ans;
     s.top=-1;
-    printf("\n read infix expression\n");
-    scanf("%s",infix);
-    infixtopostfix(&s,infix);
+    printf("\n read postfix expression\n");
+    scanf("%s",postfix);
+    ans=evaluatepostfix(&s,postfix);
+    printf("\n the final result is %f",ans);
     return 0;
 }
